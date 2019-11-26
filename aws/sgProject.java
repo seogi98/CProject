@@ -35,6 +35,14 @@ import com.amazonaws.services.ec2.model.Region;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.DescribeRegionsResult;
 
+import com.amazonaws.services.ec2.model.CreateTagsRequest;
+import com.amazonaws.services.ec2.model.CreateTagsResult;
+
+import com.amazonaws.services.ec2.model.RebootInstancesRequest;
+import com.amazonaws.services.ec2.model.RebootInstancesResult;
+
+
+
 import java.util.Scanner;
 
 public class awsTest {
@@ -243,12 +251,63 @@ public class awsTest {
     /* create instance */
     public static void createInstance()
     {
+        Scanner scan = new Scanner(System.in);
 
+        final String USAGE =
+            "To run this example, supply an instance name and AMI image id\n" +
+            "Ex: CreateInstance <instance-name> <ami-image-id>\n";
+
+        System.out.println("Input create name");
+        String name = scan.nextLine();
+        System.out.println("Input create id");
+        String ami_id = scan.nextLine();
+
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+
+        RunInstancesRequest run_request = new RunInstancesRequest()
+            .withImageId(ami_id)
+            .withInstanceType(InstanceType.T1Micro)
+            .withMaxCount(1)
+            .withMinCount(1);
+
+        RunInstancesResult run_response = ec2.runInstances(run_request);
+
+        String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
+
+        Tag tag = new Tag()
+            .withKey("Name")
+            .withValue(name);
+
+        CreateTagsRequest tag_request = new CreateTagsRequest()
+            .withTags(tag);
+
+        CreateTagsResult tag_response = ec2.createTags(tag_request);
+
+        System.out.printf(
+            "Successfully started EC2 instance %s based on AMI %s",
+            reservation_id, ami_id);
     }
     /*reboot instance */
     public static void rebootInstance()
     {
-
+        try{
+            final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+            System.out.println("input reboot ID : ");
+            Scanner scan = new Scanner(System.in);
+            String instance_id = scan.nextLine();
+            if(checkIdExist(instance_id,"REBOOT"))
+            {
+                System.out.println("Nonexistent ID, please check your ID");
+                return;
+            }
+            RebootInstancesRequest request = new RebootInstancesRequest()
+            .withInstanceIds(instance_id);
+            RebootInstancesResult response = ec2.rebootInstances(request);
+            System.out.printf("Successfully reboot instance %s", instance_id);
+        }
+        catch (Exception e) {
+            System.out.println("Error occurs while connecting process. please check your connection ");
+        }
     }
     /* list images */
     public static void listImages()
