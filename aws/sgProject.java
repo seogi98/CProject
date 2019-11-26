@@ -40,9 +40,12 @@ import com.amazonaws.services.ec2.model.CreateTagsResult;
 
 import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.RebootInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 
+import com.amazonaws.services.ec2.model.Image;
 
-
+import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 
 public class awsTest {
@@ -312,7 +315,18 @@ public class awsTest {
     /* list images */
     public static void listImages()
     {
-
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+		int flag_ami = 1;
+		DescribeImagesRequest request = new DescribeImagesRequest().withOwners("self");
+		Collection<Image> images = ec2.describeImages(request).getImages();
+		for (Image Im : images) {
+			System.out.println(flag_ami + ")");
+			System.out.println("Image ID:" + Im.getImageId());
+			System.out.println("Owner ID:" + Im.getOwnerId());
+			System.out
+				.println("AMI Status:" + Im.getState() + "\n");
+			flag_ami++;
+			}
     }
     public static boolean checkIdExist(String instance_id,String request_Type)
     {
