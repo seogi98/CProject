@@ -45,7 +45,7 @@ import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.Image;
 
 import com.amazonaws.services.ec2.model.MonitorInstancesRequest;
-import com.amazonaws.services.ec2.model.UnMonitorInstancesRequest;
+import com.amazonaws.services.ec2.model.UnmonitorInstancesRequest;
 
 import java.util.Collection;
 import java.util.List;
@@ -96,10 +96,11 @@ public class awsTest {
             System.out.println(" Cloud Computing, Computer Science Department ");
             System.out.println(" at Chungbuk National University ");
             System.out.println("------------------------------------------------------------");
-            System.out.println(" 1. list instance 2. available zones ");
-            System.out.println(" 3. start instance 4. available regions ");
-            System.out.println(" 5. stop instance 6. create instance ");
+            System.out.println(" 1. list instance   2. available zones ");
+            System.out.println(" 3. start instance  4. available regions ");
+            System.out.println(" 5. stop instance   6. create instance ");
             System.out.println(" 7. reboot instance 8. list images ");
+            System.out.println(" 9. monitoring      10.unmonitoring ");
             System.out.println(" 99. quit ");
             System.out.println("------------------------------------------------------------");
             System.out.print("Enter an integer: ");
@@ -136,6 +137,14 @@ public class awsTest {
 
                 case 8:
                     listImages();
+                    break;
+
+                case 9:
+                    monitoringInstance();
+                    break;
+
+                case 10:
+                    stopMonitoringInstance();
                     break;
 
                 case 99:
@@ -259,10 +268,6 @@ public class awsTest {
     {
         Scanner scan = new Scanner(System.in);
 
-        final String USAGE =
-            "To run this example, supply an instance name and AMI image id\n" +
-            "Ex: CreateInstance <instance-name> <ami-image-id>\n";
-
         System.out.println("Input create name");
         String name = scan.nextLine();
         System.out.println("Input create id");
@@ -272,7 +277,7 @@ public class awsTest {
 
         RunInstancesRequest run_request = new RunInstancesRequest()
             .withImageId(ami_id)
-            .withInstanceType(InstanceType.T1Micro)
+            .withInstanceType(InstanceType.T2Micro)
             .withMaxCount(1)
             .withMinCount(1);
 
@@ -280,18 +285,7 @@ public class awsTest {
 
         String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
 
-        Tag tag = new Tag()
-            .withKey("Name")
-            .withValue(name);
-
-        CreateTagsRequest tag_request = new CreateTagsRequest()
-            .withTags(tag);
-
-        CreateTagsResult tag_response = ec2.createTags(tag_request);
-
-        System.out.printf(
-            "Successfully started EC2 instance %s based on AMI %s",
-            reservation_id, ami_id);
+        System.out.println("Successfully started EC2 instance "+reservation_id+" based on AMI "+ami_id);
     }
     /*reboot instance */
     public static void rebootInstance()
@@ -330,6 +324,10 @@ public class awsTest {
 				.println("AMI Status:" + Im.getState() + "\n");
 			flag_ami++;
 			}
+    }
+
+    public static void createImages()
+    {
     }
     /*check ID exist*/
     public static boolean checkIdExist(String instance_id,String request_Type)
