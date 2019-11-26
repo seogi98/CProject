@@ -24,6 +24,17 @@ import com.amazonaws.services.ec2.model.DryRunResult;
 import com.amazonaws.services.ec2.model.DryRunSupportedRequest;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
+
+import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.Tag;
+
+import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
+import com.amazonaws.services.ec2.model.Region;
+import com.amazonaws.services.ec2.model.AvailabilityZone;
+import com.amazonaws.services.ec2.model.DescribeRegionsResult;
+
 import java.util.Scanner;
 
 public class awsTest {
@@ -153,53 +164,81 @@ public class awsTest {
             }
         }
     }
-
     /* available zones */
     public static void availableZones()
     {
+        DescribeAvailabilityZonesResult zones_response =
+            ec2.describeAvailabilityZones();
 
+        for(AvailabilityZone zone : zones_response.getAvailabilityZones()) {
+            System.out.printf(
+                    "Found availability zone %s" +
+                    "with status %s " +
+                    "in region %s\n ",
+                    zone.getZoneName(),
+                    zone.getState(),
+                    zone.getRegionName());
+        }
     }
     /* start instance */
     public static void startInstance()
     {
         final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
-        System.out.println("input start ID : \n");
+        System.out.println("input start ID : ");
         Scanner scan = new Scanner(System.in);
         String instance_id = scan.nextLine();
-         if(checkIdExist(instance_id,"START"))
-        {
-             System.out.println("Nonexistent ID");
-             return;
+        try{
+            if(checkIdExist(instance_id,"START"))
+            {
+                System.out.println("Nonexistent ID, please check your ID");
+                return;
+            }
+            StartInstancesRequest request = new StartInstancesRequest()
+                .withInstanceIds(instance_id);
+            ec2.startInstances(request);
+            System.out.printf("Sucessfully start instance %s",instance_id);
         }
-        StartInstancesRequest request = new StartInstancesRequest()
-            .withInstanceIds(instance_id);
-        ec2.startInstances(request);
-        System.out.printf("starting sucessful %s",instance_id);
+        catch (Exception e) {
+            System.out.println("Error occurs while connecting process. please check your connection ");
+        }
 
     }
     /* stop instance */
     public static void stopInstance()
     {
-        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
-        System.out.println("input stop ID : \n");
-         Scanner scan = new Scanner(System.in);
-         String instance_id = scan.nextLine();
-         if(checkIdExist(instance_id,"STOP"))
-         {
-             System.out.println("Nonexistent ID");
-             return;
-         }
-
-
-        StopInstancesRequest request = new StopInstancesRequest()
-            .withInstanceIds(instance_id);
-        ec2.stopInstances(request);
-        System.out.printf("Successfully stop instance %s", instance_id);
+        try{
+            final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+            System.out.println("input stop ID : ");
+            Scanner scan = new Scanner(System.in);
+            String instance_id = scan.nextLine();
+            if(checkIdExist(instance_id,"STOP"))
+            {
+                System.out.println("Nonexistent ID, please check your ID");
+                return;
+            }
+            StopInstancesRequest request = new StopInstancesRequest()
+                .withInstanceIds(instance_id);
+            ec2.stopInstances(request);
+            System.out.printf("Successfully stop instance %s", instance_id);
+        }
+        catch (Exception e) {
+            System.out.println("Error occurs while connecting process. please check your connection ");
+        }
     }
     /* available regions */
     public static void availableRegions()
     {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
 
+        DescribeRegionsResult regions_response = ec2.describeRegions();
+
+        for(Region region : regions_response.getRegions()) {
+            System.out.printf(
+                    "Found region %s " +
+                    "with endpoint %s\n",
+                    region.getRegionName(),
+                    region.getEndpoint());
+        }
     }
     /* create instance */
     public static void createInstance()
@@ -221,16 +260,15 @@ public class awsTest {
         final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
         boolean done = false;
         DescribeInstancesRequest request = new DescribeInstancesRequest();
-        System.out.println("checking ID");
+        System.out.println("checking ID process ...");
         while(!done) {
             DescribeInstancesResult response = ec2.describeInstances(request);
-            System.out.println("Response");
             for(Reservation reservation : response.getReservations()) {
                 for(Instance instance : reservation.getInstances()) {
-                        if(instance_id == instance.getInstanceId())
-                        {
-                            return false;
-                        }
+                    if(instance_id.equals(instance.getInstanceId()))
+                    {
+                        return false;
+                    }
                 }
             }
             request.setNextToken(response.getNextToken());
