@@ -51,6 +51,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
+import com.amazonaws.services.ec2.model.CreateKeyPairRequest;
+import com.amazonaws.services.ec2.model.CreateKeyPairResult;
+
+import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
+import com.amazonaws.services.ec2.model.KeyPairInfo;
+
+import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
+import com.amazonaws.services.ec2.model.DeleteKeyPairResult;
+
 public class awsTest {
     /*
      * Cloud Computing, Data Computing Laboratory
@@ -100,7 +109,9 @@ public class awsTest {
             System.out.println(" 3. start instance  4. available regions ");
             System.out.println(" 5. stop instance   6. create instance ");
             System.out.println(" 7. reboot instance 8. list images ");
-            System.out.println(" 9. monitoring      10.unmonitoring ");
+            System.out.println(" 9. monitoring      10. unmonitoring ");
+            System.out.println(" 11. make key pair  12. list key pair ");
+            System.out.println(" 13. delete key pair     ");
             System.out.println(" 99. quit ");
             System.out.println("------------------------------------------------------------");
             System.out.print("Enter an integer: ");
@@ -145,6 +156,15 @@ public class awsTest {
 
                 case 10:
                     stopMonitoringInstance();
+                    break;
+                case 11:
+                    makeKeypair();
+                    break;
+                case 12:
+                    listKeypair();
+                    break;
+                case 13:
+                    deleteKeypair();
                     break;
 
                 case 99:
@@ -325,10 +345,6 @@ public class awsTest {
 			flag_ami++;
 			}
     }
-
-    public static void createImages()
-    {
-    }
     /*check ID exist*/
     public static boolean checkIdExist(String instance_id,String request_Type)
     {
@@ -370,7 +386,8 @@ public class awsTest {
                     .withInstanceIds(instance_id);
             ec2.monitorInstances(request);
         }
-            /* list images */
+            
+    /* list images */
     public static void stopMonitoringInstance()
     {
         final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
@@ -386,6 +403,48 @@ public class awsTest {
             .withInstanceIds(instance_id);
         
         ec2.unmonitorInstances(request);
+    }
+
+    public static void makeKeypair()
+    {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        System.out.println("input monitoring ID : ");
+        Scanner scan = new Scanner(System.in);
+        String key_name = scan.nextLine();
+        DescribeKeyPairsResult response = ec2.describeKeyPairs();
+
+        for(KeyPairInfo key_pair : response.getKeyPairs()) {
+            System.out.println(
+                "Found key pair with name  " +key_pair.getKeyName()+
+                "and fingerprint %s"+key_pair.getKeyFingerprint());
+        }
+    }
+    
+    public static void listKeypair()
+    {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+
+        DescribeKeyPairsResult response = ec2.describeKeyPairs();
+        
+        for(KeyPairInfo key_pair : response.getKeyPairs()) {
+            System.out.println(
+                System.out.println(
+                    "Found key pair with name  " +key_pair.getKeyName()+
+                    "and fingerprint %s"+key_pair.getKeyFingerprint());
+        }
+    }
+
+    public static void deleteKeypair()
+    {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        System.out.println("input monitoring ID : ");
+        Scanner scan = new Scanner(System.in);
+        String key_name = scan.nextLine();
+        DeleteKeyPairRequest request = new DeleteKeyPairRequest()
+            .withKeyName(key_name);
+        
+        DeleteKeyPairResult response = ec2.deleteKeyPair(request);
+
     }
 
 }
