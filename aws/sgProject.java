@@ -9,6 +9,7 @@
 package project;
 //import javax.annotation.Generated;
 //import javax.annotation.processing.Generated;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.AmazonClientException;
@@ -19,6 +20,10 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3control.AWSS3ControlClientBuilder;
+import com.amazonaws.services.ec2.model.DryRunResult;
+import com.amazonaws.services.ec2.model.DryRunSupportedRequest;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import java.util.Scanner;
 
 public class awsTest {
@@ -79,19 +84,19 @@ public class awsTest {
                 case 1:
                     listInstances();
                     break;
-                    
+
                 case 2:
                     availableZones();
                     break;
-                    
+
                 case 3:
                     startInstance();
                     break;
-                    
+
                 case 4:
                     availableRegions();
                     break;
-                    
+
                 case 5:
                     stopInstance();
                     break;
@@ -99,11 +104,11 @@ public class awsTest {
                 case 6:
                     createInstance();
                     break;
-                    
+
                 case 7:
                     rebootInstance();
                     break;
-                    
+
                 case 8:
                     listImages();
                     break;
@@ -138,7 +143,7 @@ public class awsTest {
                             instance.getImageId(),
                             instance.getInstanceType(),
                             instance.getState().getName(),
-                            instance.getMonitoring().getState());
+                            instance.getMonitoring().getState());                     
                 }
                 System.out.println();
             }
@@ -157,12 +162,39 @@ public class awsTest {
     /* start instance */
     public static void startInstance()
     {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        System.out.println("input start ID : \n");
+        Scanner scan = new Scanner(System.in);
+        String instance_id = scan.nextLine();
+         if(checkIdExist(instance_id,"START"))
+        {
+             System.out.println("Nonexistent ID");
+             return;
+        }
+        StartInstancesRequest request = new StartInstancesRequest()
+            .withInstanceIds(instance_id);
+        ec2.startInstances(request);
+        System.out.printf("starting sucessful %s",instance_id);
 
     }
     /* stop instance */
     public static void stopInstance()
     {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        System.out.println("input stop ID : \n");
+         Scanner scan = new Scanner(System.in);
+         String instance_id = scan.nextLine();
+         if(checkIdExist(instance_id,"STOP"))
+         {
+             System.out.println("Nonexistent ID");
+             return;
+         }
 
+
+        StopInstancesRequest request = new StopInstancesRequest()
+            .withInstanceIds(instance_id);
+        ec2.stopInstances(request);
+        System.out.printf("Successfully stop instance %s", instance_id);
     }
     /* available regions */
     public static void availableRegions()
@@ -183,6 +215,30 @@ public class awsTest {
     public static void listImages()
     {
 
+    }
+    public static boolean checkIdExist(String instance_id,String request_Type)
+    {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        boolean done = false;
+        DescribeInstancesRequest request = new DescribeInstancesRequest();
+        System.out.println("checking ID");
+        while(!done) {
+            DescribeInstancesResult response = ec2.describeInstances(request);
+            System.out.println("Response");
+            for(Reservation reservation : response.getReservations()) {
+                for(Instance instance : reservation.getInstances()) {
+                        if(instance_id == instance.getInstanceId())
+                        {
+                            return false;
+                        }
+                }
+            }
+            request.setNextToken(response.getNextToken());
+            if(response.getNextToken() == null) {
+                done = true;
+            }
+        }
+        return true;
     }
 
 }
