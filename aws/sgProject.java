@@ -44,6 +44,9 @@ import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 
 import com.amazonaws.services.ec2.model.Image;
 
+import com.amazonaws.services.ec2.model.MonitorInstancesRequest;
+import com.amazonaws.services.ec2.model.UnMonitorInstancesRequest;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
@@ -328,6 +331,7 @@ public class awsTest {
 			flag_ami++;
 			}
     }
+    /*check ID exist*/
     public static boolean checkIdExist(String instance_id,String request_Type)
     {
         final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
@@ -350,6 +354,40 @@ public class awsTest {
             }
         }
         return true;
+    }
+    
+        /* list images */
+        public static void monitoringInstance()
+        {
+            final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+            System.out.println("input monitoring ID : ");
+            Scanner scan = new Scanner(System.in);
+            String instance_id = scan.nextLine();
+            if(checkIdExist(instance_id,"MONITOR"))
+            {
+                System.out.println("Nonexistent ID, please check your ID");
+                return;
+            }
+            MonitorInstancesRequest request = new MonitorInstancesRequest()
+                    .withInstanceIds(instance_id);
+            ec2.monitorInstances(request);
+        }
+            /* list images */
+    public static void stopMonitoringInstance()
+    {
+        final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+        System.out.println("input monitoring ID : ");
+        Scanner scan = new Scanner(System.in);
+        String instance_id = scan.nextLine();
+        if(checkIdExist(instance_id,"UNMONITOR"))
+        {
+            System.out.println("Nonexistent ID, please check your ID");
+            return;
+        }
+        UnmonitorInstancesRequest request = new UnmonitorInstancesRequest()
+            .withInstanceIds(instance_id);
+        
+        ec2.unmonitorInstances(request);
     }
 
 }
