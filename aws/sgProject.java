@@ -427,7 +427,6 @@ public class awsTest {
         DescribeKeyPairsResult response = ec2.describeKeyPairs();
         
         for(KeyPairInfo key_pair : response.getKeyPairs()) {
-            System.out.println(
                 System.out.println(
                     "Found key pair with name  " +key_pair.getKeyName()+
                     "and fingerprint %s"+key_pair.getKeyFingerprint());
