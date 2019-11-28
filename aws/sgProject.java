@@ -408,16 +408,16 @@ public class awsTest {
     public static void makeKeypair()
     {
         final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
-        System.out.println("input monitoring ID : ");
+        System.out.println("input Key name : ");
         Scanner scan = new Scanner(System.in);
         String key_name = scan.nextLine();
-        DescribeKeyPairsResult response = ec2.describeKeyPairs();
+   
 
-        for(KeyPairInfo key_pair : response.getKeyPairs()) {
-            System.out.println(
-                "Found key pair with name  " +key_pair.getKeyName()+
-                "and fingerprint %s"+key_pair.getKeyFingerprint());
-        }
+       
+        CreateKeyPairRequest request = new CreateKeyPairRequest()
+        .withKeyName(key_name);
+        CreateKeyPairResult response = ec2.createKeyPair(request);
+System.out.println("make keypair success : ");
     }
     
     public static void listKeypair()
@@ -428,21 +428,22 @@ public class awsTest {
         
         for(KeyPairInfo key_pair : response.getKeyPairs()) {
                 System.out.println(
-                    "Found key pair with name  " +key_pair.getKeyName()+
-                    "and fingerprint %s"+key_pair.getKeyFingerprint());
+                    "[key pair with name]" +key_pair.getKeyName()+"  "+
+                    "[fingerprint]"+key_pair.getKeyFingerprint());
         }
     }
 
     public static void deleteKeypair()
     {
         final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
-        System.out.println("input monitoring ID : ");
+        System.out.println("input key name : ");
         Scanner scan = new Scanner(System.in);
         String key_name = scan.nextLine();
         DeleteKeyPairRequest request = new DeleteKeyPairRequest()
             .withKeyName(key_name);
         
         DeleteKeyPairResult response = ec2.deleteKeyPair(request);
+System.out.println("delete keypair success : ");
 
     }
 
